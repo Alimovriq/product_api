@@ -58,6 +58,12 @@ python3 manage.py makemigrations
 python3 manage.py migrate
 ```
 
+Собрать статику:
+
+```bash
+python3 manage.py collectstatic
+```
+
 Запустить проект:
 
 ```bash
