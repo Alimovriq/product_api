@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    {% load static %}    
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="msapplication-TileColor" content="#000">
+    <meta name="theme-color" content="#ffffff">
+    {% block meta_csrf %}
+    {% endblock %}
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <title>
+      {% block head_header %}
+      {% endblock %}
+    </title>
+  </head>
+  <body>
+    <main> 
+      <div class="container py-5">
+        {% block table_content %}
+        {% endblock %}
+      </div>
+      <div class="container py-5">
+      {% block form_content %}
+      {% endblock %}
+      </div>
+    </main>
+    {% block js %}
+    {% endblock %}
+  </body>
+</html>

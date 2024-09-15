@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block meta_csrf %}
+<meta name="csrf-token" content="{{ csrf_token }}">
+{% endblock %}
+
+{% block head_header %}
+Товары v1.0
+{% endblock %}
+
+{% block table_content %}
+    <h2>Список товаров</h2>
+    <table id="product-list" border="2">
+        <thead>
+            <tr>
+                <th>№</th>
+                <th>Название</th>
+                <th>Описание</th>
+                <th>Цена</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+{% endblock %}
+
+{% block form_content %}
+    <h2>Форма для добавления</h2>
+    {% if form.errors %}
+        {% for field in form %}
+            {% for error in field.errors %}
+                <div class="alert alert-danger">
+                    {{ error|escape }}
+                </div>
+            {% endfor %}
+        {% endfor %}
+        {% for error in form.non_field_errors %}
+            <div class="alert alert-danger">
+                {{ error|escape }}
+            </div>
+        {% endfor %}
+    {% endif %}
+    <form id="product-form" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {% for field in form %}
+        <div class="card-body">
+            <div class="form-group row my-3">
+                <label for="{{ field.id_for_label }}">
+                    {{ field.label }}
+                    {% if field.field.required %}
+                    <span class="required text-danger">*</span>
+                    {% endif %}
+                </label>
+                <div class="col-sm-10">
+                    {{ field }}
+                    {% if field.help_text %}
+                    <small id="{{ field.id_for_label }}-help" class="form-text text-muted">
+                        {{ field.help_text|safe }}
+                    </small>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+        <div class="d-flex justify-content">
+            <button type="submit" class="btn btn-primary">
+                Добавить
+            </button>
+        </div>
+    </form>
+{% endblock %}
+
+{% block js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('product-form');
+        const tableBody = document.querySelector('#product-list tbody');
+
+        form.addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            const title = document.getElementById('id_title').value;
+            const description = document.getElementById('id_description').value; 
+            const price = parseFloat(document.getElementById('id_price').value);
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+            const response = await fetch('/api/v1/products/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({ title, description, price }),
+            });
+
+            if (response.ok) {
+                await fetchProducts();
+                form.reset();
+            } else {
+                alert('Не удалось добавить товар');
+            }
+        });
+
+        async function fetchProducts() {
+            const response = await fetch('/api/v1/products/');
+            const products = await response.json();
+            tableBody.innerHTML = '';
+            products.forEach(product => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${product.id}</td>
+                    <td>${product.title}</td>
+                    <td>${product.description}</td>
+                    <td>${product.price}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        fetchProducts();
+    });
+</script>
+{% endblock %}
